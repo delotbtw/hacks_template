@@ -1,0 +1,68 @@
+[project]
+name = "hackathon-template"
+version = "0.1.0"
+description = "Шаблон для хакатонов: FastAPI + Postgres + Redis + React"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "alembic>=1.20.1",
+    "asyncpg>=0.32.0",
+    "fastapi>=0.162.0",
+    "itsdangerous>=2.2.0",
+    "pydantic-settings>=2.16.2",
+    "redis>=8.1.0",
+    "sqladmin>=0.32.0",
+    "sqlalchemy[asyncio]>=2.1.6",
+    "uvicorn[standard]>=0.54.0",
+]
+
+[dependency-groups]
+dev = [
+    "httpx>=0.28.1",
+    "pre-commit>=4.7.0",
+    "pytest>=9.2.0",
+    "pytest-asyncio>=1.4.1.post1",
+    "ruff>=0.17.3",
+    "ty>=0.0.95",
+]
+ml = [
+    "jupyter>=1.1.1",
+    "pandas>=3.1.0",
+    "scikit-learn>=1.9.1",
+]
+llm = [
+    "openai>=3.42.1",
+]
+
+[tool.uv]
+default-groups = ["dev"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py313"
+extend-exclude = ["alembic/versions"]
+
+[tool.ruff.lint]
+# E/W/F ошибки, I импорты, B баги, SIM упрощения, T20 запрет print, C90 сложность, UP современный синтаксис
+select = ["E", "W", "F", "I", "B", "SIM", "T20", "C90", "UP"]
+
+[tool.ruff.lint.mccabe]
+max-complexity = 10
+
+[tool.ruff.lint.per-file-ignores]
+"tests/*" = ["B018"]
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+asyncio_default_fixture_loop_scope = "session"
+asyncio_default_test_loop_scope = "session"
+testpaths = ["tests"]
+
+[tool.ty.environment]
+python-version = "3.13"
+
+[tool.ty.src]
+exclude = ["alembic"]
+
+[tool.ruff.lint.isort]
+known-third-party = ["alembic"]
