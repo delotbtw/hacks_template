@@ -1,7 +1,7 @@
 """create items
 
 Revision ID: 0001
-Revises: 
+Revises:
 Create Date: 2026-11-03 01:12:48.686753
 
 """

@@ -1,0 +1,17 @@
+# Override для demo: цели demo, без bind-mount и перезагрузки кода.
+services:
+  migrate:
+    image: hackathon-api:demo
+  api:
+    image: hackathon-api:demo
+    build:
+      target: demo
+    volumes: !reset []
+  web:
+    image: hackathon-web:demo
+    build:
+      target: demo
+    environment: !reset {}
+    volumes: !reset []
+    ports: !override
+      - "${WEB_PORT:-5173}:80"

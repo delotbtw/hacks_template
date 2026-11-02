@@ -1,0 +1,99 @@
+# Dev-режим по умолчанию. Demo: compose.demo.yaml (см. make demo).
+x-api-env: &api-env
+  env_file: .env
+  environment:
+    POSTGRES_HOST: db
+    REDIS_HOST: redis
+
+services:
+  db:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-app}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-app}
+      POSTGRES_DB: ${POSTGRES_DB:-app}
+    ports:
+      - "127.0.0.1:${POSTGRES_PORT:-5432}:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 3s
+      timeout: 3s
+      retries: 20
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "127.0.0.1:${REDIS_PORT:-6379}:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 3s
+      timeout: 3s
+      retries: 20
+
+  migrate:
+    <<: *api-env
+    image: hackathon-api:dev  # образ собирает сервис api (make up делает build заранее)
+    pull_policy: never
+    command: ["alembic", "upgrade", "head"]
+    restart: "no"
+    depends_on:
+      db:
+        condition: service_healthy
+
+  api:
+    <<: *api-env
+    image: hackathon-api:dev
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.api
+      target: dev
+    ports:
+      - "${API_PORT:-8000}:8000"
+    volumes:
+      - ./app:/app/app
+      - ./ml:/app/ml
+      - ./agent:/app/agent
+      - ./alembic:/app/alembic
+      - ./alembic.ini:/app/alembic.ini
+      - ./scripts:/app/scripts
+      - ./tests:/app/tests
+      - ./contracts:/app/contracts
+      - ./pyproject.toml:/app/pyproject.toml
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      migrate:
+        condition: service_completed_successfully
+
+  web:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.web
+      target: dev
+    image: hackathon-web:dev
+    environment:
+      API_PROXY_TARGET: http://api:8000
+    ports:
+      - "${WEB_PORT:-5173}:5173"
+    volumes:
+      - ./web/src:/app/src
+      - ./web/index.html:/app/index.html
+      - ./web/vite.config.ts:/app/vite.config.ts
+    depends_on:
+      - api
+
+  mock:
+    profiles: ["mock"]
+    image: stoplight/prism:5
+    command: ["mock", "-h", "0.0.0.0", "-p", "4010", "--multiprocess=false", "/contracts/openapi.json"]
+    ports:
+      - "${MOCK_PORT:-4010}:4010"
+    volumes:
+      - ./contracts:/contracts:ro
+
+volumes:
+  pgdata:
