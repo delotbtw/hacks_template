@@ -16,6 +16,16 @@ make up        # db, redis, migrate, api, web (dev, с перезагрузко�
 Web: http://localhost:5173 · API docs: http://localhost:8000/docs · Админка: http://localhost:8000/admin
 (перед хакатоном смените `ADMIN_PASSWORD` и `ADMIN_SECRET_KEY` в `.env`; `.env` создаётся из `.env.example`).
 
+## Чек-лист перед первым использованием
+
+Не проверено автором шаблона (нужен GitHub и ваш ноутбук):
+
+- [ ] Репозиторий запушен на GitHub, включено Settings → General → **Template repository**.
+- [ ] Settings → Actions → General → Workflow permissions: **Read and write**; после первого пуша в `main` проверить, что `images.yml` отработал и образы появились в Packages.
+- [ ] Оффлайн-проверка (раздел ниже) пройдена на вашем ноутбуке.
+- [ ] Прогрев с пустого кэша (`docker builder prune -af && make warm`) пройден на вашем диске Docker (≥ 10 ГБ); дальше кэш не чистить.
+- [ ] В `.env` сменены `ADMIN_PASSWORD` и `ADMIN_SECRET_KEY`; у каждого участника свой `OPENAI_API_KEY`.
+
 ## Команды
 
 `make help` выводит полный список. Основные:
