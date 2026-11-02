@@ -36,8 +36,8 @@ warm: .env ## Прогрев кэшей (образы, колёса, пакет�
 	docker pull redis:7-alpine
 	docker pull stoplight/prism:5
 	docker pull ghcr.io/astral-sh/uv:0.9.13
-	docker build -f docker/Dockerfile.api --target deps --build-arg UV_GROUPS=--all-groups -t hackathon-warm:deps .
-	docker rmi hackathon-warm:deps
+	docker build -f docker/Dockerfile.api --target warm -t hackathon-warm:tmp .
+	docker rmi hackathon-warm:tmp
 	$(COMPOSE) build
 	uv sync --all-groups
 	cd web && pnpm install

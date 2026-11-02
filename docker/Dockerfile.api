@@ -43,3 +43,9 @@ COPY alembic.ini ./
 USER appuser
 EXPOSE 8000
 CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
+
+# --- warm: только наполняет кэш uv колёсами ВСЕХ групп (ml, llm); venv удаляется в том же слое ---
+FROM base AS warm
+COPY pyproject.toml uv.lock .python-version ./
+RUN --mount=type=cache,id=uv-cache,target=/root/.cache/uv \
+    uv sync --frozen --no-install-project --all-groups && rm -rf /opt/venv
